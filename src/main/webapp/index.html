@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <title>Hello, world!</title>
+    <script>
+        function loadHallData() {
+            $.ajax({
+                url: getContextPath() + '/hall',
+                dataType: 'json',
+                contentType: 'json',
+                data: {action: 'new'}
+            }).done(function (data) {
+                $(data).each(function (index, el) {
+                    let seat = $('input[id=' + data[index].customID + ']');
+                    seat.attr('desc', 'Row: ' + data[index].row + ' || Column: ' + data[index].col);
+                    seat.val(data[index].id);
+                    if (data[index].accountId !== 0) {
+                        seat.prop({
+                            checked: true,
+                            disabled: true
+                        });
+                    }
+                })
+            })
+                .then(update);
+        }
+
+        function update() {
+            $.ajax({
+                url: getContextPath() + '/hall',
+                dataType: 'json',
+                contentType: 'json',
+                data: {action: 'update'},
+                success: function (data) {
+                    $(data).each(function (index, el) {
+                        let seat = $('input[id=' + data[index].customID + ']');
+                        let booked = data[index].accountId !== 0;
+                        seat.prop({
+                            checked: booked,
+                            disabled: booked
+                        })
+                    })
+                },
+                complete: update,
+                timeout: 30000
+            })
+        }
+
+        function bookChoosingSeats() {
+            let checkboxesValue = [];
+            $.each($('input[name="place"]:checked:not(:disabled)'), function () {
+                let idVal = $(this).val();
+                let descVal = $(this).attr('desc');
+                let obj = {id: idVal, desc: descVal};
+                checkboxesValue.push(obj);
+            })
+            $.ajax({
+                url: getContextPath() + '/hall',
+                method: 'POST',
+                data: JSON.stringify(checkboxesValue),
+                contentType: 'json',
+                dataType: 'json',
+                statusCode: {
+                    200: function () {
+                        toPaymentPage();
+                    }
+                }
+            })
+        }
+
+        function toPaymentPage() {
+            window.location.href = getContextPath() + '/payment.html';
+        }
+
+        function getContextPath() {
+            return location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+        }
+    </script>
+
+</head>
+<body onload="loadHallData()">
+<!--<body>-->
+<div class="container">
+    <div class="row pt-3">
+        <h4>
+            Бронирование мест на сеанс
+        </h4>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th style="width: 120px;">Ряд / Место</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+            </tr>
+            </thead>
+            <tbody id="table_body">
+            <tr>
+                <th>1</th>
+                <td>
+                    <input type="checkbox" name="place" value="" id="11">
+                    <label for="11" data-toggle="tooltip"
+                           data-placement="top" title="Место занято">Ряд 1, Место 1</label>
+                </td>
+                <td>
+                    <input type="checkbox" name="place" value="" id="12">
+                    <label for="12">Ряд 1, Место 2</label>
+                </td>
+                <td>
+                    <input type="checkbox" name="place" value="" id="13">
+                    <label for="13">Ряд 1, Место 3</label>
+                </td>
+            </tr>
+            <tr>
+                <th>2</th>
+                <td>
+                    <input type="checkbox" name="place" value="" id="21">
+                    <label for="21">Ряд 2, Место 1</label>
+                </td>
+                <td>
+                    <input type="checkbox" name="place" value="" id="22">
+                    <label for="22">Ряд 2, Место 2</label>
+                </td>
+                <td>
+                    <input type="checkbox" name="place" value="" id="23">
+                    <label for="23">Ряд 2, Место 3</label>
+                </td>
+            </tr>
+            <tr>
+                <th>3</th>
+                <td>
+                    <input type="checkbox" name="place" value="" id="31">
+                    <label for="31">Ряд 3, Место 1</label>
+                </td>
+                <td>
+                    <input type="checkbox" name="place" value="" id="32">
+                    <label for="32">Ряд 3, Место 2</label>
+                </td>
+                <td>
+                    <input type="checkbox" name="place" value="" id="33">
+                    <label for="33">Ряд 3, Место 3</label>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="row float-right">
+        <button type="button" class="btn btn-success" onclick="bookChoosingSeats();">Оплатить
+        </button>
+    </div>
+</div>
+</body>
+</html>

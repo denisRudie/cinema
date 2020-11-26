@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script>
+        let seats = [];
+
+        function loadData() {
+            $.ajax({
+                url: getContextPath() + '/pay',
+                contentType: 'json',
+                dataType: 'json'
+            }).done(function (data) {
+                let totPrice = 0.00;
+                $(data).each(function (index, el) {
+                    let seat = {id: data[index].id};
+                    seats.push(seat);
+                    $('#choosingSeats').append(
+                        '<p>Row: ' + data[index].row + ' | Col: ' + data[index].col + '</p>');
+                    totPrice += data[index].price;
+                });
+                $('#totalPrice').append('</br>' + totPrice);
+            })
+        }
+
+        function getContextPath() {
+            return location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+        }
+
+        function toMainPage() {
+            window.location.href = getContextPath() + '/index.html';
+        }
+
+        function saveData() {
+            let user = {
+                'name': $('#username').val(), 'email': $('#email').val()
+            };
+
+            $.ajax({
+                url: getContextPath() + '/pay',
+                method: 'POST',
+                data: JSON.stringify(user),
+                contentType: 'json',
+                dataType: 'json'
+            })
+            toMainPage();
+        }
+    </script>
+    <title>Payment</title>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+</head>
+<body onload="loadData()">
+
+<div class="container">
+    <div class="row pt-3">
+        <h3 id="choosingSeats">
+            You have been chosen seats:
+        </h3>
+    </div>
+    <div class="row pt-3">
+        <h3 id="totalPrice">
+            Total price:
+        </h3>
+    </div>
+    <div class="row">
+        <form>
+            <div class="form-group">
+                <label for="username">Name</label>
+                <input type="text" class="form-control" id="username" placeholder="Name">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" class="form-control" id="email" placeholder="Email">
+            </div>
+            <button type="button" class="btn btn-success" onclick="saveData()">Order</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

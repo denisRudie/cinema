@@ -1,0 +1,38 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         version="2.5"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+  <display-name>Archetype Created Web Application</display-name>
+
+<!--  <servlet>-->
+<!--    <servlet-name>HallServlet</servlet-name>-->
+<!--    <servlet-class>ru.cinema.servlet.HallServlet</servlet-class>-->
+<!--  </servlet>-->
+
+<!--  <servlet-mapping>-->
+<!--    <servlet-name>HallServlet</servlet-name>-->
+<!--    <url-pattern>/hall</url-pattern>-->
+<!--  </servlet-mapping>-->
+
+  <servlet>
+    <servlet-name>PaymentServlet</servlet-name>
+    <servlet-class>ru.cinema.servlet.PaymentServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>PaymentServlet</servlet-name>
+    <url-pattern>/pay</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>BookServlet</servlet-name>
+    <servlet-class>ru.cinema.servlet.BookServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>BookServlet</servlet-name>
+    <url-pattern>/book</url-pattern>
+  </servlet-mapping>
+
+</web-app>
