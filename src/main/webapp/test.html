@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <title>Hello, world!</title>
+    <script>
+        function loadHallData() {
+            $.ajax({
+                url: getContextPath() + '/test',
+                dataType: 'json',
+                contentType: 'json',
+                data: {action: 'new'}
+            }).done(function (data) {
+                $(data).each(function (index, el) {
+                    let seat = $('input[id=' + data[index].customID + ']');
+                    seat.val(data[index].id);
+                    if (data[index].accountId !== 0) {
+                        seat.prop({
+                            checked: true,
+                            disabled: true
+                        });
+                    }
+                })
+            })
+                .then(update);
+        }
+
+        function update() {
+            $.ajax({
+                url: getContextPath() + '/test',
+                dataType: 'json',
+                contentType: 'json',
+                data: {action: 'update'},
+                success: function (data) {
+                    $(data).each(function (index, el) {
+                        let seat = $('input[id=' + data[index].customID + ']');
+                        let booked = data[index].accountId !== 0;
+                        seat.prop({
+                            checked: booked,
+                            disabled: booked
+                        })
+                    })
+                },
+                complete: update,
+                timeout: 30000
+            })
+        }
+
+        function bookChoosingSeats() {
+            let checkboxesValue = [];
+            $.each($('input[name="place"]:checked:not(:disabled)'), function () {
+                let idVal = $(this).val();
+                let obj = {id: idVal};
+                checkboxesValue.push(obj);
+            })
+            $.ajax({
+                url: getContextPath() + '/test',
+                method: 'POST',
+                data: JSON.stringify(checkboxesValue),
+                contentType: 'json',
+                dataType: 'json'
+            }).fail(function (data) {
+                console.log(data);
+            })
+        }
+
+        function getContextPath() {
+            return location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+        }
+    </script>
+
+</head>
+<body onload="loadHallData()">
+<div class="container">
+    <div class="row pt-3">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th style="width: 120px;">Ряд / Место</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+            </tr>
+            </thead>
+            <tbody id="table_body">
+            <tr>
+                <th>1</th>
+                <td>
+                    <input type="checkbox" name="place" value="" id="11">
+                    <label for="11" data-toggle="tooltip"
+                           data-placement="top" title="Место занято">Ряд 1, Место 1</label>
+                </td>
+                <td>
+                    <input type="checkbox" name="place" value="" id="12">
+                    <label for="12">Ряд 1, Место 2</label>
+                </td>
+                <td>
+                    <input type="checkbox" name="place" value="" id="13">
+                    <label for="13">Ряд 1, Место 3</label>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="row float-right">
+        <button type="button" class="btn btn-success" onclick="bookChoosingSeats();">Оплатить
+        </button>
+    </div>
+</div>
+</body>
+</html>
