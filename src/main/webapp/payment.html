@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        var seats = [];
+
+        function loadData() {
+            $.ajax({
+                url: getContextPath() + '/pay',
+                method: 'GET',
+                dataType: 'json'
+            }).done(function (data) {
+                let totPrice = 0.00;
+                $(data).each(function (index, el) {
+                    let seat = {id: data[index].id};
+                    seats.push(seat);
+                    $('#choosingSeats').append('</br>' + data[index].desc);
+                    totPrice+= data[index].price;
+                });
+                $('#totalPrice').append('</br>' + totPrice);
+            }).fail(function (data) {
+                console.log(data);
+            });
+        }
+
+        function getContextPath() {
+            return location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+        }
+
+        function toMainPage() {
+            window.location.href = getContextPath() + '/index.html';
+        }
+
+        function book() {
+            $.ajax({
+                url: getContextPath() + '/book',
+                method: 'POST',
+                data: JSON.stringify(seats),
+                dataType: 'json'
+            });
+            toMainPage();
+        }
+    </script>
+    <title>Payment</title>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+</head>
+<body onload="loadData()">
+
+<div class="container">
+    <div class="row pt-3">
+        <h3 id="choosingSeats">
+            You have been chosen seats:
+        </h3>
+    </div>
+    <div class="row pt-3">
+        <h3 id="totalPrice">
+            Total price:
+        </h3>
+    </div>
+    <div class="row">
+        <form>
+            <div class="form-group">
+                <label for="username">ФИО</label>
+                <input type="text" class="form-control" id="username" placeholder="ФИО">
+            </div>
+            <div class="form-group">
+                <label for="phone">Номер телефона</label>
+                <input type="text" class="form-control" id="phone" placeholder="Номер телефона">
+            </div>
+            <button type="button" class="btn btn-success" onclick="book()">Оплатить</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
