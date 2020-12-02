@@ -74,7 +74,6 @@ public class PsqlStore implements Store {
             LOG.error(e.getMessage(), e);
         }
 
-
 //        init accounts from db to cache
         try (Connection cn = pool.getConnection();
              PreparedStatement ps = cn.prepareStatement(FIND_ALL_ACCOUNTS)
@@ -107,19 +106,26 @@ public class PsqlStore implements Store {
     }
 
     @Override
-    public void setSeatOwner(int seatId, int accId) {
+    public void tempSeatOwner(int seatId, int accId) {
         Seat updatedSeat = cachedSeats.get(seatId);
         updatedSeat.setAccountId(accId);
         cachedSeats.computeIfPresent(seatId, (k, v) -> updatedSeat);
+    }
 
-        try (Connection cn = pool.getConnection();
-             PreparedStatement ps = cn.prepareStatement(SET_SEAT_OWNER)
-        ) {
-            ps.setInt(1, accId);
-            ps.setInt(2, seatId);
-            ps.execute();
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+    @Override
+    public void setSetSeatOwner(int ownerId) {
+        Collection<Seat> seatByOwner = getSeatByOwner(ownerId);
+
+        for (Seat seat : seatByOwner) {
+            try (Connection cn = pool.getConnection();
+                 PreparedStatement ps = cn.prepareStatement(SET_SEAT_OWNER)
+            ) {
+                ps.setInt(1, ownerId);
+                ps.setInt(2, seat.getId());
+                ps.execute();
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 

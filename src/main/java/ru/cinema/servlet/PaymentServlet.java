@@ -13,10 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PaymentServlet extends HttpServlet {
@@ -24,46 +23,30 @@ public class PaymentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
-        Map<Seat, String> seats = (HashMap<Seat, String>) session.getAttribute("chosenSeats");
+        resp.setCharacterEncoding("UTF-8");
+        List<Seat> seats = (List<Seat>) session.getAttribute("chosenSeats");
+        String jsonOut = new Gson().toJson(seats);
         try (PrintWriter writer = resp.getWriter()) {
-            JSONArray ja = new JSONArray();
-            for (Map.Entry<Seat, String> seat : seats.entrySet()) {
-                JSONObject obj = new JSONObject();
-                obj.put("id", seat.getKey().getId());
-                obj.put("price", seat.getKey().getPrice());
-                obj.put("desc", seat.getValue());
-                ja.add(obj);
-            }
-            String jsonOut = new Gson().toJson(ja);
+//            JSONArray ja = new JSONArray();
+//            for (Map.Entry<Seat, String> seat : seats.entrySet()) {
+//                JSONObject obj = new JSONObject();
+//                obj.put("id", seat.getKey().getId());
+//                obj.put("price", seat.getKey().getPrice());
+//                obj.put("desc", seat.getValue());
+//                ja.add(obj);
+//            }
             writer.write(jsonOut);
             writer.flush();
         }
     }
 
+    //TODO реализовать считываение имени и телефона, при нажатии кнопки сохранять пользователя в
+    // бд. Связывать сессию с этим пользователем. Добавить Listener, который будет уничтожать
+    // записи в бд, относящиеся к этому пользователю при протухании сессии.
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try (BufferedReader read = req.getReader()) {
-            StringBuilder fullLine = new StringBuilder();
-            String oneLine;
-            while ((oneLine = read.readLine()) != null) {
-                fullLine.append(oneLine);
-            }
-            JSONArray json = (JSONArray) new JSONParser().parse(fullLine.toString());
-            Map<Seat, String> seats = new HashMap<>();
-
-            for (Object o : json) {
-                JSONObject j = (JSONObject) o;
-                int sId = Integer.parseInt(j.get("id").toString());
-                String desc = j.get("desc").toString();
-                seats.put(PsqlStore.instOf().getSeatById(sId), desc);
-            }
-//            seats.values().forEach(System.out::println);
-            HttpSession session = req.getSession();
-//            System.out.println(session.getId());
-            session.setAttribute("chosenSeats", seats);
-            resp.sendRedirect("payment.html");
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
+        HttpSession session = req.getSession();
+        PsqlStore.instOf().setSetSeatOwner(1);
+        resp.sendRedirect(req.getContextPath() + "/hall");
     }
 }

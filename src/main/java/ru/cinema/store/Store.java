@@ -9,7 +9,9 @@ public interface Store {
 
     public Collection<Seat> getAllSeats();
 
-    public void setSeatOwner(int seatId, int accId);
+    public void tempSeatOwner(int seatId, int accId);
+
+    void setSetSeatOwner(int ownerId);
 
     public Seat getSeatById(int seatId);
 

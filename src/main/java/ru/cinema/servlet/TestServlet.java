@@ -55,6 +55,7 @@ public class TestServlet extends HttpServlet {
                 JSONObject j = (JSONObject) o;
                 int sId = Integer.parseInt(j.get("id").toString());
                 TestStore.getInst().setSeatOwner(sId, 213);
+                bookedSeats.add(TestStore.getInst().getSeatById(sId));
             }
 
             String jsonOut = new Gson().toJson(bookedSeats);

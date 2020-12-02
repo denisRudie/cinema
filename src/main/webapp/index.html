@@ -10,14 +10,15 @@
           href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
           crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
     <title>Hello, world!</title>
     <script>
         function loadHallData() {
             $.ajax({
                 url: getContextPath() + '/hall',
-                method: 'POST',
-                dataType: 'json'
+                dataType: 'json',
+                contentType: 'json',
+                data: {action: 'new'}
             }).done(function (data) {
                 $(data).each(function (index, el) {
                     let seat = $('input[id=' + data[index].customID + ']');
@@ -30,14 +31,32 @@
                         });
                     }
                 })
-            }).fail(function (data) {
-                console.log(data);
-            });
+            })
+                .then(update);
         }
-        setInterval(loadHallData, 30000);
 
+        function update() {
+            $.ajax({
+                url: getContextPath() + '/hall',
+                dataType: 'json',
+                contentType: 'json',
+                data: {action: 'update'},
+                success: function (data) {
+                    $(data).each(function (index, el) {
+                        let seat = $('input[id=' + data[index].customID + ']');
+                        let booked = data[index].accountId !== 0;
+                        seat.prop({
+                            checked: booked,
+                            disabled: booked
+                        })
+                    })
+                },
+                complete: update,
+                timeout: 30000
+            })
+        }
 
-        function loadChoosingSeats() {
+        function bookChoosingSeats() {
             let checkboxesValue = [];
             $.each($('input[name="place"]:checked:not(:disabled)'), function () {
                 let idVal = $(this).val();
@@ -46,13 +65,17 @@
                 checkboxesValue.push(obj);
             })
             $.ajax({
-                url: getContextPath() + '/pay',
+                url: getContextPath() + '/hall',
                 method: 'POST',
                 data: JSON.stringify(checkboxesValue),
                 contentType: 'json',
                 dataType: 'json',
-            });
-            toPaymentPage();
+                statusCode: {
+                    200: function () {
+                        toPaymentPage();
+                    }
+                }
+            })
         }
 
         function toPaymentPage() {
@@ -85,31 +108,31 @@
             <tr>
                 <th>1</th>
                 <td>
-                    <input type="checkbox" name="place" value="11" id="11">
+                    <input type="checkbox" name="place" value="" id="11">
                     <label for="11" data-toggle="tooltip"
                            data-placement="top" title="Место занято">Ряд 1, Место 1</label>
                 </td>
                 <td>
-                    <input type="checkbox" name="place" value="12" id="12">
+                    <input type="checkbox" name="place" value="" id="12">
                     <label for="12">Ряд 1, Место 2</label>
                 </td>
                 <td>
-                    <input type="checkbox" name="place" value="13" id="13">
+                    <input type="checkbox" name="place" value="" id="13">
                     <label for="13">Ряд 1, Место 3</label>
                 </td>
             </tr>
             <tr>
                 <th>2</th>
                 <td>
-                    <input type="checkbox" name="place" value="21" id="21">
+                    <input type="checkbox" name="place" value="" id="21">
                     <label for="21">Ряд 2, Место 1</label>
                 </td>
                 <td>
-                    <input type="checkbox" name="place" value="22" id="22">
+                    <input type="checkbox" name="place" value="" id="22">
                     <label for="22">Ряд 2, Место 2</label>
                 </td>
                 <td>
-                    <input type="checkbox" name="place" value="23" id="23">
+                    <input type="checkbox" name="place" value="" id="23">
                     <label for="23">Ряд 2, Место 3</label>
                 </td>
             </tr>
@@ -120,11 +143,11 @@
                     <label for="31">Ряд 3, Место 1</label>
                 </td>
                 <td>
-                    <input type="checkbox" name="place" value="32" id="32">
+                    <input type="checkbox" name="place" value="" id="32">
                     <label for="32">Ряд 3, Место 2</label>
                 </td>
                 <td>
-                    <input type="checkbox" name="place" value="33" id="33">
+                    <input type="checkbox" name="place" value="" id="33">
                     <label for="33">Ряд 3, Место 3</label>
                 </td>
             </tr>
@@ -132,7 +155,7 @@
         </table>
     </div>
     <div class="row float-right">
-        <button type="button" class="btn btn-success" onclick="loadChoosingSeats();">Оплатить
+        <button type="button" class="btn btn-success" onclick="bookChoosingSeats();">Оплатить
         </button>
     </div>
 </div>
