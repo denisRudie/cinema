@@ -26,13 +26,13 @@
   </servlet-mapping>
 
   <servlet>
-    <servlet-name>BookServlet</servlet-name>
-    <servlet-class>ru.cinema.servlet.BookServlet</servlet-class>
+    <servlet-name>UpdateServlet</servlet-name>
+    <servlet-class>ru.cinema.servlet.UpdateServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>BookServlet</servlet-name>
-    <url-pattern>/book</url-pattern>
+    <servlet-name>UpdateServlet</servlet-name>
+    <url-pattern>/update</url-pattern>
   </servlet-mapping>
 
 </web-app>

@@ -17,12 +17,10 @@
             $.ajax({
                 url: getContextPath() + '/hall',
                 dataType: 'json',
-                contentType: 'json',
-                data: {action: 'new'}
+                contentType: 'json'
             }).done(function (data) {
                 $(data).each(function (index, el) {
                     let seat = $('input[id=' + data[index].customID + ']');
-                    seat.attr('desc', 'Row: ' + data[index].row + ' || Column: ' + data[index].col);
                     seat.val(data[index].id);
                     if (data[index].accountId !== 0) {
                         seat.prop({
@@ -32,50 +30,57 @@
                     }
                 })
             })
-                .then(update);
-        }
-
-        function update() {
-            $.ajax({
-                url: getContextPath() + '/hall',
-                dataType: 'json',
-                contentType: 'json',
-                data: {action: 'update'},
-                success: function (data) {
-                    $(data).each(function (index, el) {
-                        let seat = $('input[id=' + data[index].customID + ']');
-                        let booked = data[index].accountId !== 0;
-                        seat.prop({
-                            checked: booked,
-                            disabled: booked
-                        })
-                    })
-                },
-                complete: update,
-                timeout: 30000
-            })
         }
 
         function bookChoosingSeats() {
-            let checkboxesValue = [];
-            $.each($('input[name="place"]:checked:not(:disabled)'), function () {
-                let idVal = $(this).val();
-                let descVal = $(this).attr('desc');
-                let obj = {id: idVal, desc: descVal};
-                checkboxesValue.push(obj);
-            })
-            $.ajax({
-                url: getContextPath() + '/hall',
-                method: 'POST',
-                data: JSON.stringify(checkboxesValue),
-                contentType: 'json',
-                dataType: 'json',
-                statusCode: {
-                    200: function () {
-                        toPaymentPage();
+            if (validate()) {
+                let chosenCheckboxes = $('input[name="place"]:checked:not(:disabled)');
+                let checkboxesValue = [];
+                $.each(chosenCheckboxes, function () {
+                    let idVal = $(this).val();
+                    let obj = {id: idVal};
+                    checkboxesValue.push(obj);
+                })
+                $.ajax({
+                    url: getContextPath() + '/hall',
+                    method: 'POST',
+                    data: JSON.stringify(checkboxesValue),
+                    contentType: 'json',
+                    dataType: 'json',
+                    statusCode: {
+                        200: function () {
+                            toPaymentPage();
+                        }
                     }
-                }
-            })
+                })
+            } else {
+                alert("This place already booked")
+                loadHallData();
+            }
+        }
+
+
+        function validate() {
+            let rsl = null;
+            let chosenCheckboxes = $('input[name="place"]:checked:not(:disabled)');
+            if (chosenCheckboxes.length > 0) {
+                let checkboxesValue = [];
+                $.each(chosenCheckboxes, function () {
+                    let obj = {id: $(this).val()};
+                    checkboxesValue.push(obj);
+                })
+                $.ajax({
+                    url: getContextPath() + '/update',
+                    dataType: 'json',
+                    contentType: 'json',
+                    method: 'POST',
+                    async: false,
+                    data: JSON.stringify(checkboxesValue)
+                }).done(function(data) {
+                    rsl = (data == true);
+                } )
+            } else rsl = false;
+            return rsl;
         }
 
         function toPaymentPage() {
