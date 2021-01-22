@@ -9,6 +9,7 @@ import ru.cinema.model.Seat;
 import ru.cinema.store.PsqlStore;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,10 +19,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+@WebServlet(urlPatterns = "/pay")
 public class PaymentServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession();
         resp.setCharacterEncoding("UTF-8");
         List<Seat> seats = (List<Seat>) session.getAttribute("chosenSeats");
